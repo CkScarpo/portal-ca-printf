@@ -1,181 +1,216 @@
-CA Printf Portal
-Uma aplicação web para o Centro Acadêmico Printf, oferecendo consulta a documentos, informações de carreira, envio e gerenciamento de requerimentos, com autenticação e separação de permissões entre alunos e administradores.
+# Portal CA Printf
 
-Sumário
-Funcionalidades
+Uma aplicação web para o Centro Acadêmico Printf, oferecendo:
 
-Tecnologias
+- Consulta a documentos (atas, fotos, vídeos)
+- Informações sobre carreiras em TI
+- Envio, leitura e gerenciamento de requerimentos
+- Autenticação com Google e e-mail/senha
+- Permissões diferenciadas entre alunos e administradores
+- Suporte a light/dark mode
 
-Demonstração
+---
 
-Instalação
+## Sumário
 
-Configuração do Firebase
+- [Funcionalidades](#funcionalidades)
+- [Tecnologias](#tecnologias)
+- [Demonstração](#demonstração)
+- [Instalação](#instalação)
+- [Configuração do Firebase](#configuração-do-firebase)
+- [Variáveis de Ambiente](#variáveis-de-ambiente)
+- [Estrutura de Pastas](#estrutura-de-pastas)
+- [Como Usar](#como-usar)
+- [Contribuição](#contribuição)
+- [Licença](#licença)
 
-Estrutura de Pastas
+---
 
-Uso
+## Funcionalidades
 
-Contribuição
+- 📦 Autenticação
+  - Login com Google
+  - Login/registro por e-mail e senha
+  - Recuperação de senha
+- 🎨 Tema
+  - Light / Dark mode via toggle
+  - Preferência salva em sessão
+- 📄 Documentos
+  - Estatuto, atas, fotos e vídeos
+  - Filtro por categoria
+- 💼 Carreiras
+  - Orientações sobre carreiras em TI
+- 📨 Requerimentos
+  - Envio anônimo ou identificado
+  - Autor visualiza apenas os próprios
+  - Admin visualiza, filtra, responde e deleta
+  - Feedback com SweetAlert2
 
-Licença
+---
 
-Funcionalidades
-Autenticação com Google e e-mail/senha
+## Tecnologias
 
-Registro de usuário e recuperação de senha
+- **React 18**
+- **Material-UI v5**
+- **React Router v6**
+- **Firebase Auth & Firestore**
+- **Zustand** (state management)
+- **SweetAlert2** (modais)
+- **TypeScript**
 
-Modo light/dark com persistência
+---
 
-Página pública de documentos com filtro por categoria
+## Demonstração
 
-Página de carreiras em TI
+> _Exemplo ilustrativo_
 
-Seção de requerimentos:
+![Portal CA Printf – modo dark mostrando requerimentos](./screenshot.png)
 
-Envio de novos requerimentos (anônimo ou identificado)
+---
 
-Permissão de leitura somente ao autor ou ao administrador
+## Instalação
 
-Painel administrativo para visualizar, responder e deletar requerimentos
-
-Filtro por tipo de requerimento
-
-Feedback visual com SweetAlert2
-
-Header responsivo com menu collapse em mobile
-
-Toggle de tema global via Zustand + MUI ThemeProvider
-
-Tecnologias
-React 18
-
-Material-UI v5
-
-React Router v6
-
-Firebase Auth & Firestore
-
-Zustand (state management)
-
-SweetAlert2 (modais e alertas)
-
-TypeScript
-
-Demonstração
-
-Instalação
-Clone o repositório:
-
-bash
+```bash
+# 1. Clone este repositório
 git clone https://github.com/seu-usuario/ca-printf-portal.git
 cd ca-printf-portal
-Instale as dependências:
 
-bash
+# 2. Instale dependências
 npm install
-
 # ou
-
 yarn
-Crie um arquivo .env.local na raiz com as credenciais do Firebase:
+```
 
-VITE_FIREBASE_API_KEY=SEU_API_KEY
-VITE_FIREBASE_AUTH_DOMAIN=SEU_AUTH_DOMAIN
-VITE_FIREBASE_PROJECT_ID=SEU_PROJECT_ID
-VITE_FIREBASE_STORAGE_BUCKET=SEU_STORAGE_BUCKET
-VITE_FIREBASE_MESSAGING_SENDER_ID=SEU_SENDER_ID
-VITE_FIREBASE_APP_ID=SEU_APP_ID
-Inicie em modo de desenvolvimento:
+---
 
-bash
-npm run dev
+## Configuração do Firebase
 
-# ou
+1. Acesse o [Console do Firebase](https://console.firebase.google.com/) e crie um novo projeto.
+2. No menu **Authentication**, habilite os provedores:
+   - Google
+   - E-mail/Senha
+3. Em **Firestore Database**, crie a coleção `admins` e adicione documentos cujo **ID** seja o `uid` de cada administrador.
+4. Em **Rules** do Firestore, substitua pelo código abaixo:
 
-yarn dev
-Configuração do Firebase
-No Console do Firebase:
+   ```js
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       function isAdmin() {
+         return exists(
+           /databases/$(database)/documents/admins/$(request.auth.uid)
+         );
+       }
 
-Crie um projeto e ative Authentication (Google e E-mail/Senha).
+       match /requerimentos/{reqId} {
+         allow create: if request.auth.uid != null;
+         allow get, list: if request.auth.uid != null
+           && (isAdmin() || resource.data.uid == request.auth.uid);
+         allow update, delete: if isAdmin();
+       }
 
-Crie a coleção admins no Firestore — adicione documentos cujo id seja o uid do usuário admin.
+       match /admins/{adminId} {
+         allow read: if request.auth.uid != null;
+         allow write: if false;
+       }
+     }
+   }
+   ```
 
-Configure as regras de segurança do Firestore:
+---
 
-js
-rules_version = '2';
-service cloud.firestore {
-match /databases/{database}/documents {
-function isAdmin() {
-return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
-}
-match /requerimentos/{reqId} {
-allow create: if request.auth.uid != null;
-allow get, list: if request.auth.uid != null
-&& (isAdmin() || resource.data.uid == request.auth.uid);
-allow update, delete: if isAdmin();
-}
-}
-}
-Estrutura de Pastas
+## Variáveis de Ambiente
+
+Crie um arquivo `.env.local` na raiz do projeto e defina suas credenciais do Firebase:
+
+```env
+VITE_FIREBASE_API_KEY="SUA_API_KEY"
+VITE_FIREBASE_AUTH_DOMAIN="SEU_AUTH_DOMAIN"
+VITE_FIREBASE_PROJECT_ID="SEU_PROJECT_ID"
+VITE_FIREBASE_STORAGE_BUCKET="SEU_STORAGE_BUCKET"
+VITE_FIREBASE_MESSAGING_SENDER_ID="SEU_SENDER_ID"
+VITE_FIREBASE_APP_ID="SEU_APP_ID"
+VITE_FIREBASE_MEASUREMENT_ID="SEU_MEASUREMENT_ID"
+```
+
+---
+
+## Estrutura de Pastas
+
+```plain
 src/
 ├─ components/
-│ ├─ Header.tsx
-│ ├─ ThemeToggle.tsx
-│ ├─ ModalNovoRequerimento.tsx
-│ └─ ResponderRequerimento.tsx
+│  ├─ Header.tsx
+│  ├─ ThemeToggle.tsx
+│  ├─ ModalNovoRequerimento.tsx
+│  └─ ResponderRequerimento.tsx
 ├─ hooks/
-│ └─ useRequerimentos.ts
+│  └─ useRequerimentos.ts
 ├─ pages/
-│ ├─ Home.tsx
-│ ├─ Documentos.tsx
-│ ├─ Carreiras.tsx
-│ ├─ Requerimentos.tsx
-│ ├─ RequerimentosAdmin.tsx
-│ ├─ Login.tsx
-│ ├─ Cadastro.tsx
-│ └─ EsqueciSenha.tsx
+│  ├─ Home.tsx
+│  ├─ Documentos.tsx
+│  ├─ Carreiras.tsx
+│  ├─ Requerimentos.tsx
+│  ├─ RequerimentosAdmin.tsx
+│  ├─ Login.tsx
+│  ├─ Cadastro.tsx
+│  └─ EsqueciSenha.tsx
 ├─ services/
-│ ├─ authService.ts
-│ └─ requerimentoService.ts
+│  ├─ firebase.ts
+│  ├─ authService.ts
+│  └─ requerimentoService.ts
 ├─ store/
-│ ├─ userStore.ts
-│ └─ themeStore.ts
+│  ├─ userStore.ts
+│  └─ themeStore.ts
 ├─ theme.ts
 ├─ Root.tsx
 └─ App.tsx
-Uso
-Navegação
+```
 
-Home: visão geral do portal
+---
 
-Documentos: acesso a estatuto, atas, fotos e vídeos com filtro por categoria
+## Como Usar
 
-Carreiras: orientações sobre carreiras em TI
+1. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   # ou
+   yarn dev
+   ```
+2. Abra o navegador em http://localhost:3000.
 
-Requerimentos: envio e listagem dos seus pedidos
+3. Navegue pelo menu principal:
 
-Administração
+- Home: visão geral do portal
 
-Faça login como admin para acessar /painel-admin
+- Documentos: estatuto, atas, fotos e vídeos (filtro por categoria)
 
-Responda, filtre e delete requerimentos diretamente pelo painel
+- Carreiras: orientações sobre profissões em TI
 
-Tema
+- Requerimentos: criação e listagem dos seus pedidos
 
-Clique no ícone de sol/lua no header para alternar entre light e dark
+- Painel Admin: /painel-admin (acesso restrito a administradores)
 
-Contribuição
-Fork este repositório
+- Use o ícone de sol/lua no cabeçalho para alternar entre Light e Dark Mode.
 
-Crie sua branch (git checkout -b feature/minha-feature)
+## Contribuição
 
-Commit suas mudanças (git commit -m 'Adiciona nova feature')
+Faça um fork deste repositório.
 
-Push para a branch (git push origin feature/minha-feature)
+Crie uma branch para sua feature:
 
-Abra um Pull Request
+bash
+git checkout -b feature/nome-da-sua-feature
+Implemente suas alterações e faça commit:
 
-Licença
-Este projeto está licenciado sob a MIT License. Veja o arquivo LICENSE para detalhes.
+bash
+git commit -m "Descrição da feature ou correção"
+Envie para o seu fork:
+
+bash
+git push origin feature/nome-da-sua-feature
+Abra um Pull Request no repositório original, descrevendo as mudanças realizadas.
+
+## Licença
+
+Este projeto está licenciado sob a MIT License. Sinta-se à vontade para usar, modificar e distribuir conforme os termos da licença.
