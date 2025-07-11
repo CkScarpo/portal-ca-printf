@@ -58,12 +58,16 @@ export default function Cadastro() {
       navigate(isAdm ? "/painel-admin" : "/requerimentos");
     } catch (err: any) {
       console.error(err);
-      Swal.fire({
+      const mensagem = err.code?.includes("auth/email-already-in-use")
+        ? "E-mail já cadastrado."
+        : err.code?.includes("auth/weak-password") || senha.length < 6
+        ? "A senha precisa ter pelo menos 6 caracteres."
+        : "Tente novamente mais tarde.";
+
+      await Swal.fire({
         icon: "error",
         title: "Erro no cadastro",
-        text: err.code?.includes("auth/email-already-in-use")
-          ? "E-mail já cadastrado."
-          : "Tente novamente mais tarde.",
+        text: mensagem,
       });
     } finally {
       setLoading(false);
