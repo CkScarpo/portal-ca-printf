@@ -16,6 +16,7 @@ import {
   enviarRequerimento,
   type NovoRequerimento,
 } from "../../services/requerimentoService";
+import Swal from "sweetalert2";
 
 interface Props {
   open: boolean;
@@ -57,11 +58,21 @@ export default function ModalNovoRequerimento({
     setEnviando(true);
     try {
       await enviarRequerimento({ uid: user.uid, email: user!.email!, ...form });
-      reload();
       onClose();
+      await Swal.fire({
+        icon: "success",
+        title: "Requerimento enviado",
+        text: "Seu requerimento foi enviado com sucesso!",
+      });
+      reload();
       setForm({ nome: "", tipo: "", assunto: "", mensagem: "" });
     } catch {
       setErro("Erro ao enviar requerimento. Tente novamente.");
+      await Swal.fire({
+        icon: "error",
+        title: "Erro ao enviar",
+        text: "Não foi possível enviar o requerimento. Tente novamente mais tarde.",
+      });
     } finally {
       setEnviando(false);
     }

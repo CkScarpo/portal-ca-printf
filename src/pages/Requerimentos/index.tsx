@@ -56,10 +56,11 @@ export default function Requerimentos() {
         poderão ser removidos pelo CA Printf a critério da equipe.
       </Typography>
 
-      <Button variant="contained" onClick={abrirModal} sx={{ mb: 3 }}>
-        Novo requerimento
-      </Button>
-
+      {!isAdmin && (
+        <Button variant="contained" onClick={abrirModal} sx={{ mb: 3 }}>
+          Novo requerimento
+        </Button>
+      )}
       <ModalNovoRequerimento
         open={aberto}
         onClose={fecharModal}
