@@ -42,7 +42,10 @@ export function Header() {
   const handleMenu = (e: React.MouseEvent<HTMLElement>) =>
     setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
-
+  const handleMyProfile = () => {
+    handleClose();
+    navigate("/meu-perfil");
+  };
   const handleLogout = async () => {
     await logout();
     setUser(null);
@@ -129,6 +132,7 @@ export function Header() {
                   <AccountCircle />
                 </IconButton>
                 <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                  <MenuItem onClick={handleMyProfile}>Meu perfil</MenuItem>
                   <MenuItem onClick={handleLogout}>Sair</MenuItem>
                 </Menu>
               </>

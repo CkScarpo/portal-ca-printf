@@ -42,6 +42,21 @@ export default function Requerimentos() {
       ? requerimentos
       : requerimentos.filter((r) => r.tipo === filtroTipo);
 
+  const ordenados = useMemo(() => {
+    const getTimestamp = (val: string | Date) =>
+      val instanceof Date ? val.getTime() : new Date(val).getTime();
+
+    const comResposta = filtrados
+      .filter((r) => !!r.resposta)
+      .sort((a, b) => getTimestamp(a.enviadoEm) - getTimestamp(b.enviadoEm));
+
+    const semResposta = filtrados
+      .filter((r) => !r.resposta)
+      .sort((a, b) => getTimestamp(a.enviadoEm) - getTimestamp(b.enviadoEm));
+
+    return [...comResposta, ...semResposta];
+  }, [filtrados]);
+
   if (loading || carregando) return <Skeleton height={200} />;
 
   return (
@@ -92,10 +107,10 @@ export default function Requerimentos() {
         </>
       )}
       <Stack spacing={2}>
-        {filtrados.length === 0 && (
+        {ordenados.length === 0 && (
           <Typography>Nenhum requerimento encontrado.</Typography>
         )}
-        {filtrados.map((r: Requerimento) => (
+        {ordenados.map((r: Requerimento) => (
           <Paper
             key={r.id}
             sx={{
@@ -115,7 +130,9 @@ export default function Requerimentos() {
             <Typography mb={1}>
               <strong>Descrição: </strong> {r.mensagem}
             </Typography>
-            <Typography variant="body2">Anônimo</Typography>
+            <Typography variant="body2">
+              {r.nome ? r.email : "Anônimo"}
+            </Typography>
 
             {r.resposta ? (
               <Paper

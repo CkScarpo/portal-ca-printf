@@ -30,6 +30,14 @@ export const responderRequerimento = async (id: string, resposta: string) => {
   await updateDoc(ref, { resposta });
 };
 
+export const editarRespostaRequerimento = async (
+  id: string,
+  resposta: string
+) => {
+  const ref = doc(db, "requerimentos", id);
+  await updateDoc(ref, { resposta });
+};
+
 export const deletarRequerimento = async (id: string) => {
   const ref = doc(db, "requerimentos", id);
   await deleteDoc(ref);

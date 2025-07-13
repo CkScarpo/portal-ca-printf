@@ -45,7 +45,7 @@ const documentos: Documento[] = [
   },
   {
     titulo: "Vídeos do Centro Acadêmico",
-    categoria: "Videos",
+    categoria: "Vídeos",
     descricao: "Vídeos com palestras, workshops e momentos marcantes.",
     url: "https://drive.google.com/drive/folders/1InHSlN88aa3-FVJHapZqG4KiDLnNCbgM?usp=sharing",
   },
@@ -68,7 +68,7 @@ export default function Documentos() {
       </Typography>
       <Typography color="text.secondary" mb={3} maxWidth={700}>
         Acesse aqui os documentos mais importantes do CA, como estatutos, atas
-        de reunião e comunicados oficiais.
+        de reunião, eventos, fotos e vídeos.
       </Typography>
 
       <ToggleButtonGroup

@@ -15,7 +15,6 @@ Uma aplicação web para o Centro Acadêmico Printf, oferecendo:
 
 - [Funcionalidades](#funcionalidades)
 - [Tecnologias](#tecnologias)
-- [Demonstração](#demonstração)
 - [Instalação](#instalação)
 - [Configuração do Firebase](#configuração-do-firebase)
 - [Variáveis de Ambiente](#variáveis-de-ambiente)
@@ -57,14 +56,6 @@ Uma aplicação web para o Centro Acadêmico Printf, oferecendo:
 - **Zustand** (state management)
 - **SweetAlert2** (modais)
 - **TypeScript**
-
----
-
-## Demonstração
-
-> _Exemplo ilustrativo_
-
-![Portal CA Printf – modo dark mostrando requerimentos](./screenshot.png)
 
 ---
 
@@ -155,6 +146,7 @@ src/
 │  ├─ Login.tsx
 │  ├─ Cadastro.tsx
 │  └─ EsqueciSenha.tsx
+│  └─ MeuPerfil.tsx
 ├─ services/
 │  ├─ firebase.ts
 │  ├─ authService.ts

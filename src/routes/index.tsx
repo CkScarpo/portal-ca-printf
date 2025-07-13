@@ -11,6 +11,7 @@ import AuthLayout from "../layout/AuthLayout";
 import RequerimentosAdmin from "../pages/RequerimentosAdmin";
 import PrecisaEstarLogado from "../pages/PrecisaEstarLogado";
 import EsqueciSenha from "../pages/EsqueciSenha";
+import { MeuPerfil } from "../pages/MeuPerfil";
 
 export const router = createBrowserRouter([
   {
@@ -25,6 +26,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Requerimentos />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "meu-perfil",
+        element: (
+          <ProtectedRoute>
+            <MeuPerfil />
           </ProtectedRoute>
         ),
       },

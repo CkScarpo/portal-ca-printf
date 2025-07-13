@@ -9,6 +9,9 @@ import {
   browserLocalPersistence,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
 } from "firebase/auth";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -43,4 +46,24 @@ export const checkAdmin = async (uid: string): Promise<boolean> => {
   const ref = doc(db, "admins", uid);
   const snap = await getDoc(ref);
   return snap.exists();
+};
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export const changePassword = async ({
+  currentPassword,
+  newPassword,
+}: ChangePasswordPayload) => {
+  const user = auth.currentUser;
+  if (!user || !user.email) {
+    throw new Error("Usuário não autenticado");
+  }
+
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+
+  await updatePassword(user, newPassword);
 };

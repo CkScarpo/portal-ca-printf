@@ -8,6 +8,7 @@ import {
   Button,
   ToggleButtonGroup,
   ToggleButton,
+  IconButton,
 } from "@mui/material";
 import { useUserStore } from "../../store/userStore";
 import {
@@ -15,7 +16,11 @@ import {
   type Requerimento,
 } from "../../hooks/useRequerimentos";
 import ResponderRequerimento from "../../components/ResponderRequerimento";
-import { deletarRequerimento } from "../../services/requerimentoService";
+import {
+  deletarRequerimento,
+  editarRespostaRequerimento,
+} from "../../services/requerimentoService";
+import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Swal from "sweetalert2";
 import { useMemo, useState } from "react";
@@ -37,6 +42,39 @@ export default function RequerimentosAdmin() {
     filtroTipo === "todos"
       ? requerimentos
       : requerimentos.filter((r) => r.tipo === filtroTipo);
+
+  const ordenados = useMemo(() => {
+    const semResposta = filtrados.filter((r) => !r.resposta);
+    const comResposta = filtrados.filter((r) => !!r.resposta);
+
+    const sortByDateAsc = (a: Requerimento, b: Requerimento) =>
+      new Date(a.enviadoEm).getTime() - new Date(b.enviadoEm).getTime();
+
+    semResposta.sort(sortByDateAsc);
+    comResposta.sort(sortByDateAsc);
+
+    return [...semResposta, ...comResposta];
+  }, [filtrados]);
+
+  const handleEdit = async (r: Requerimento) => {
+    const { value } = await Swal.fire<string>({
+      title: "Editar resposta",
+      input: "textarea",
+      inputLabel: "Resposta",
+      inputValue: r.resposta || "",
+      showCancelButton: true,
+      confirmButtonText: "Salvar",
+      cancelButtonText: "Cancelar",
+    });
+    if (!value) return;
+    try {
+      await editarRespostaRequerimento(r.id, value);
+      Swal.fire("Atualizado!", "Resposta atualizada com sucesso.", "success");
+      carregarRequerimentos();
+    } catch {
+      Swal.fire("Erro", "Não foi possível editar a resposta.", "error");
+    }
+  };
 
   const handleDelete = async (id: string) => {
     const result = await Swal.fire({
@@ -102,10 +140,10 @@ export default function RequerimentosAdmin() {
       </ToggleButtonGroup>
 
       <Stack spacing={2}>
-        {filtrados.length === 0 && (
+        {ordenados.length === 0 && (
           <Typography>Nenhum requerimento encontrado.</Typography>
         )}
-        {filtrados.map((r: Requerimento) => (
+        {ordenados.map((r: Requerimento) => (
           <Paper
             key={r.id}
             sx={{
@@ -162,6 +200,8 @@ export default function RequerimentosAdmin() {
                 sx={{
                   p: 1,
                   mt: 1,
+                  display: "flex",
+                  alignContent: "space-between",
                   bgcolor:
                     theme.palette.mode === "dark"
                       ? theme.palette.grey[800]
@@ -171,6 +211,14 @@ export default function RequerimentosAdmin() {
                 <Typography variant="body2">
                   <strong>Resposta:</strong> {r.resposta}
                 </Typography>
+                <IconButton
+                  size="small"
+                  color="warning"
+                  onClick={() => handleEdit(r)}
+                  sx={{ mr: 1 }}
+                >
+                  <EditIcon />
+                </IconButton>
               </Paper>
             ) : (
               <ResponderRequerimento
