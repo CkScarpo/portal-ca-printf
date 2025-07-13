@@ -102,7 +102,7 @@ export function Header() {
             sx={{ cursor: "pointer", flexGrow: { xs: 1, md: 0 } }}
             onClick={() => navigate("/")}
           >
-            CA PRINTF
+            Portal CA PRINTF
           </Typography>
 
           <Box
