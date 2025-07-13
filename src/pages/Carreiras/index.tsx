@@ -1,4 +1,3 @@
-// src/pages/Carreiras.tsx
 import {
   Box,
   Typography,

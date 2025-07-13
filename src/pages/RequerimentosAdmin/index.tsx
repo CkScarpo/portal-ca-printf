@@ -23,14 +23,15 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Swal from "sweetalert2";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function RequerimentosAdmin() {
   const theme = useTheme();
   const { user, loading, isAdmin } = useUserStore();
+  const [mostrarTopo, setMostrarTopo] = useState(false);
   const { requerimentos, carregando, carregarRequerimentos } =
     useRequerimentos();
-
+  const fimRef = useRef<HTMLDivElement | null>(null);
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
 
   const tipos = useMemo(
@@ -55,6 +56,21 @@ export default function RequerimentosAdmin() {
 
     return [...semResposta, ...comResposta];
   }, [filtrados]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setMostrarTopo(entry.isIntersecting);
+      },
+      {
+        threshold: 0.4,
+      }
+    );
+
+    if (fimRef.current) observer.observe(fimRef.current);
+
+    return () => observer.disconnect();
+  }, [ordenados.length, filtroTipo]);
 
   const handleEdit = async (r: Requerimento) => {
     const { value } = await Swal.fire<string>({
@@ -143,9 +159,14 @@ export default function RequerimentosAdmin() {
         {ordenados.length === 0 && (
           <Typography>Nenhum requerimento encontrado.</Typography>
         )}
-        {ordenados.map((r: Requerimento) => (
+        {ordenados.map((r: Requerimento, index) => (
           <Paper
             key={r.id}
+            ref={
+              index === ordenados.length - 1 && ordenados.length > 1
+                ? fimRef
+                : null
+            }
             sx={{
               p: 2,
               overflow: "hidden",
@@ -200,6 +221,7 @@ export default function RequerimentosAdmin() {
                 sx={{
                   p: 1,
                   mt: 1,
+                  mb: 8,
                   display: "flex",
                   alignContent: "space-between",
                   bgcolor:
@@ -221,14 +243,39 @@ export default function RequerimentosAdmin() {
                 </IconButton>
               </Paper>
             ) : (
-              <ResponderRequerimento
-                requerimento={r}
-                onRespondido={carregarRequerimentos}
-              />
+              <Box sx={{ mb: 2 }}>
+                <ResponderRequerimento
+                  requerimento={r}
+                  onRespondido={carregarRequerimentos}
+                />
+              </Box>
             )}
           </Paper>
         ))}
       </Stack>
+      {mostrarTopo && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: 16,
+            left: "50%",
+            transform: "translateX(-50%)",
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 3,
+            px: 2,
+            py: 1,
+            zIndex: 10,
+          }}
+        >
+          <Button
+            size="small"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          >
+            Voltar ao topo
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 }

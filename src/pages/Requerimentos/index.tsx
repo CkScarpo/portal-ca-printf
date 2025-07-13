@@ -16,7 +16,7 @@ import {
 } from "../../hooks/useRequerimentos";
 import ModalNovoRequerimento from "../../components/ModalNovoRequerimento";
 import ResponderRequerimento from "../../components/ResponderRequerimento";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function Requerimentos() {
   const theme = useTheme();
@@ -29,8 +29,9 @@ export default function Requerimentos() {
     fecharModal,
     carregarRequerimentos,
   } = useRequerimentos();
-
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
+  const [mostrarTopo, setMostrarTopo] = useState(false);
+  const fimRef = useRef<HTMLDivElement | null>(null);
 
   const tipos = useMemo(
     () => Array.from(new Set(requerimentos.map((r) => r.tipo))),
@@ -56,6 +57,21 @@ export default function Requerimentos() {
 
     return [...comResposta, ...semResposta];
   }, [filtrados]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setMostrarTopo(entry.isIntersecting);
+      },
+      {
+        threshold: 0.4,
+      }
+    );
+
+    if (fimRef.current) observer.observe(fimRef.current);
+
+    return () => observer.disconnect();
+  }, [ordenados.length, filtroTipo]);
 
   if (loading || carregando) return <Skeleton height={200} />;
 
@@ -110,9 +126,14 @@ export default function Requerimentos() {
         {ordenados.length === 0 && (
           <Typography>Nenhum requerimento encontrado.</Typography>
         )}
-        {ordenados.map((r: Requerimento) => (
+        {ordenados.map((r: Requerimento, index) => (
           <Paper
             key={r.id}
+            ref={
+              index === ordenados.length - 1 && ordenados.length > 1
+                ? fimRef
+                : null
+            }
             sx={{
               p: 2,
               overflow: "hidden",
@@ -162,6 +183,29 @@ export default function Requerimentos() {
           </Paper>
         ))}
       </Stack>
+      {mostrarTopo && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: 16,
+            left: "50%",
+            transform: "translateX(-50%)",
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 3,
+            px: 2,
+            py: 1,
+            zIndex: 10,
+          }}
+        >
+          <Button
+            size="small"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          >
+            Voltar ao topo
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 }
