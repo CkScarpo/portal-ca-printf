@@ -99,7 +99,7 @@ export default function ResponderRequerimento({
           </Typography>
           <Typography variant="body2" mb={2}>
             <strong>Enviado por: </strong>{" "}
-            {requerimento.email ? requerimento.email : "Anônimo"}
+            {requerimento.nome ? requerimento.email : "Anônimo"}
           </Typography>
           <Stack spacing={2}>
             <TextField
