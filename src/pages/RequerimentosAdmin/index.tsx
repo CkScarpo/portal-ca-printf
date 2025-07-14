@@ -222,25 +222,31 @@ export default function RequerimentosAdmin() {
                   p: 1,
                   mt: 1,
                   mb: 8,
-                  display: "flex",
-                  alignContent: "space-between",
                   bgcolor:
                     theme.palette.mode === "dark"
                       ? theme.palette.grey[800]
                       : theme.palette.grey[100],
                 }}
               >
-                <Typography variant="body2">
-                  <strong>Resposta:</strong> {r.resposta}
-                </Typography>
-                <IconButton
-                  size="small"
-                  color="warning"
-                  onClick={() => handleEdit(r)}
-                  sx={{ mr: 1 }}
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "start",
+                  }}
                 >
-                  <EditIcon />
-                </IconButton>
+                  <Typography variant="body2">
+                    <strong>Resposta:</strong> {r.resposta}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    color="warning"
+                    onClick={() => handleEdit(r)}
+                    sx={{ mr: 1 }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </Box>
               </Paper>
             ) : (
               <Box sx={{ mb: 2 }}>
